@@ -16,22 +16,17 @@ Runtime: 100 ms
 Memory Usage: 14.4 MB
 Submitted: 1 minute ago
 
-Runtime: 108 ms, faster than 26.87% of Python3 online submissions for Valid Sudoku.
+Runtime: 96 ms, faster than 69.72% of Python3 online submissions for Valid Sudoku.
 Memory Usage: 14.1 MB, less than 96.72% of Python3 online submissions for Valid Sudoku.
-
 """
-
 class Solution:
     def isValidSudoku(self, board: List[List[str]]) -> bool:
         return self.check_rows(board)  and self.check_3x3(board) and self.check_cols(board)
         
     def check_rows(self, board):
         for row in board:
-            list1 = list()
-            set1 = set()
-            [list1.append(i) for i in row if i != '.']
-            [set1.add(i) for i in row if i != '.']
-            if len(list1) != len(set1):
+            check = [i for i in row if i != '.']
+            if len(set(check)) != len(check):
                 return False
         return True
     
@@ -60,10 +55,36 @@ class Solution:
                 yield lst[i:i + n]
         squres = list(chunks(check,9))
         for i in squres:
-            list1 = list()
-            set1 = set()
-            [list1.append(i) for i in i if i != '.']
-            [set1.add(i) for i in i if i != '.']
-            if len(set1) != len(list1):
+            check_squres = [i for i in i if i != '.']
+            if len(set(check_squres)) != len(check_squres):
                 return False
         return True
+
+
+"""
+better sol with hashtable
+Runtime: 88 ms, faster than 95.02% of Python3 online submissions for Valid Sudoku.
+Memory Usage: 14 MB, less than 96.72% of Python3 online submissions for Valid Sudoku.
+"""
+
+class Solution:
+    def isValidSudoku(self, board: List[List[str]]) -> bool:
+        def isSubBox(i,j,x,y):
+            if (i//3 == x//3) and (j//3 == y//3):
+                return True
+            return False
+            
+        hashtable = {}
+        for i in range(9):
+            for j in range(9):
+                num = board[i][j]
+                if num != ".":
+                    if num not in hashtable.keys():
+                        hashtable[num] = [(i,j)]
+                    else:
+                        for (x,y) in hashtable[num]:
+                            if x == i or y == j or isSubBox(i,j,x,y):
+                                return False
+                        hashtable[num] += [(i,j)]
+        return True
+                      
