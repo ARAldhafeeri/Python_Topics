@@ -1,113 +1,64 @@
 """
-unfinished !
+Design and implement a
+data structure for a Least Frequently Used (LFU) cache.
+
+sol performance:
+Runtime: 804 ms, faster than 75.06% of Python3 online submissions for LFU Cache.
+Memory Usage: 76.5 MB, less than 53.76% of Python3 online submissions for LFU Cache.
+
 
 """
 
-from collections import OrderedDict
 class LFUCache:
-
     def __init__(self, capacity: int):
+        """
+        self.capacity: the maximum capacity of the cache
+        self.cache: normal hashtable that maps 1 key to 1 value
+        self.freq_keys: one frequently used key to many keys, 
+        those many keys are or ordered in a Ordered hashtable.
+        For example: with one given key we can find ;
+        1- the frequency of the given key in self.freq_keys
+        2- using the frequency value we get all other keys with the 
+        same frequency!
+        3- when there are many frequently used key, OrderDict record 
+        values in LRC way, therefore;
+        the first item will be popout
+        """
         self.capacity = capacity
-        self.cache = OrderedDict()
-        self.counter = dict()
+        self.cache = dict() 
+        self.min_freq = None
+        self.freq_keys = collections.defaultdict(collections.OrderedDict)
 
     def get(self, key: int) -> int:
-        print('get')
-        counter_key = f"count_{key}"
-        if key not in self.cache.keys():
+        if key not in self.cache:
             return -1
-        self.cache.move_to_end(key)
-        if counter_key in self.counter.keys():
-            self.counter[counter_key] += 1
-        else:
-            self.counter[counter_key] = 0
-        print(key, counter_key, self.counter[counter_key])
-        print(self.cache)
-        return self.cache[key]
-
-        
+        freq=self.cache[key]
+        val=self.freq_keys[freq][key]
+        del self.freq_keys[freq][key]
+        if not self.freq_keys[freq]:
+            if freq==self.min_freq:
+                self.min_freq+=1
+        self.cache[key]=freq+1
+        self.freq_keys[freq+1][key]=val
+        return val
 
     def put(self, key: int, value: int) -> None:
-        print('put')
-        if len(self.cache) > self.capacity: # cache reached capacity
-            counter_sorted = sorted(self.counter.items(), key=lambda x: x[1], reverse=False)
-            limit = 0
-            two_lfu_keys = list()
-            for i in counter_sorted:
-                if limit == 2:
-                    break
-                key = i[0]
-                target = key.split("_")
-                two_lfu_keys.append(target[1])
-                limit += 1
-            if two_lfu_keys[0] == two_lfu_keys[1]:
-                print(f"dict before pop {self.cache}")
-                self.cache.popitem(last= False)
-                print(f"popeditem last=true {self.cache}")
-            else:
-                key = int(two_lfu_keys[0])
-                print(self.cache.keys())
-                print(f"dict before pop {self.cache}")
-                self.cache.pop(key)
-                print(f"pop key = {key} dict after pop {self.cache}")
-                self.counter.pop(f"count_{key}") 
-        else:
-            self.cache[key] = value
-            self.cache.move_to_end(key)
-        
+        if self.capacity<=0:
+            return
+        if key in self.cache:
+            freq=self.cache[key]
+            self.freq_keys[freq][key]=value
+            self.get(key)
+            return
+        if self.capacity==len(self.cache):
+            delkey,delval=self.freq_keys[self.min_freq].popitem(last=False)
+            del self.cache[delkey]
+        self.cache[key]=1
+        self.freq_keys[1][key]=value
+        self.min_freq=1
 
 
 # Your LFUCache object will be instantiated and called as such:
 # obj = LFUCache(capacity)
 # param_1 = obj.get(key)
 # obj.put(key,value)
-
-
-class LFUCache:
-
-    def __init__(self, capacity):
-        """
-        :type capacity: int
-        """
-        self.cache = {}
-        self.count = collections.defaultdict(collections.OrderedDict)
-        self.min = 0
-        self.capacity = capacity
-
-    def get(self, key):
-        """
-        :type key: int
-        :rtype: int
-        """
-        if key not in self.cache:
-            return -1
-        value, count = self.cache[key]
-        del self.count[count][key]
-        if count == self.min and not self.count[count]:
-            self.min += 1
-        self.count[count+1][key] = 0
-        self.cache[key] = (value, count+1)
-        return value
-
-    def put(self, key, value):
-        """
-        :type key: int
-        :type value: int
-        :rtype: void
-        """
-        if self.capacity <= 0:
-            return
-        if key in self.cache:
-            old, count = self.cache[key]
-            self.cache[key] = (value, count)
-            self.get(key)
-        elif len(self.cache) == self.capacity:
-            old_key, v = self.count[self.min].popitem(last=False)
-            del self.cache[old_key]
-            self.min = 1
-            self.cache[key] = (value, 1)
-            self.count[1][key] = 0
-        else:
-            self.min = 1
-            self.cache[key] = (value, 1)
-            self.count[1][key] = 0
