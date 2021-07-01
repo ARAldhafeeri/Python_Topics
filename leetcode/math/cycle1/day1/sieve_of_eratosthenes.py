@@ -44,23 +44,18 @@ class Solution:
 """
 this year sol:
 using sieve of eratosthenes algorthim
-
+Runtime: 752 ms, faster than 90.35% of Python3 online submissions for Count Primes.
+Memory Usage: 103.4 MB, less than 32.59% of Python3 online submissions for Count Primes.
 """
 
-    prime = [True for i in range(n+1)]
-    p = 2
-    while (p * p <= n):
- 
-        # If prime[p] is not
-        # changed, then it is a prime
-        if (prime[p] == True):
- 
-            # Update all multiples of p
-            for i in range(p * p, n+1, p):
-                prime[i] = False
-        p += 1
- 
-    # Print all prime numbers
-    for p in range(2, n+1):
-        if prime[p]:
-            print p,
+class Solution:
+    def countPrimes(self, n: int) -> int:
+        if n <= 2:
+            return 0
+        is_prime = [False] * 2 + [True] * (n-2)
+        i = 2
+        while i*i < n:
+            if is_prime[i]:
+                is_prime[i*i:n:i] = [False] * len(is_prime[i*i:n:i])
+            i += 1
+        return sum(is_prime)
