@@ -30,6 +30,5 @@ class Solution:
         res = [0,1]
         for i in range(2,n+1):
             res.append(res[-1] + res[-2])       
-            print(res[-1] + res[-2])
         return res[-1]
         
